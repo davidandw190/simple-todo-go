@@ -76,3 +76,18 @@ func (t *Todos) Load(filename string) error {
 
 	return nil
 }
+
+// Store writes the todo items to a file in JSON format.
+func (t *Todos) Store(filename string) error {
+	data, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filename, data, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
