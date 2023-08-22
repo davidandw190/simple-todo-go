@@ -14,7 +14,7 @@ const (
 
 func main() {
 
-	add := flag.Bool("add", false, "-> add a new todo item")
+	add := flag.Bool("a", false, "add a new todo item")
 
 	flag.Parse()
 
