@@ -14,7 +14,13 @@ const (
 
 func main() {
 
+	// short form flags
 	add := flag.Bool("a", false, "add a new todo item")
+	complete := flag.Int("c", 0, "mark a todo item as completed")
+
+	// long form flags
+	flag.BoolVar(add, "add", false, "add a new todo item")
+	flag.IntVar(complete, "complete", 0, "mark a todo item as completed")
 
 	flag.Parse()
 
@@ -33,6 +39,19 @@ func main() {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
+
+	case *complete > 0:
+		err := todos.Complete(*complete)
+		if err != nil {
+			fmt.Fprint(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		err = todos.Store(todoFile)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+
 	default:
 		fmt.Fprint(os.Stdout, "invalid command")
 		os.Exit(0)
