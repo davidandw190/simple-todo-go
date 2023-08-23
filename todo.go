@@ -4,6 +4,7 @@ package todo
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"time"
 )
@@ -90,4 +91,16 @@ func (t *Todos) Store(filename string) error {
 	}
 
 	return nil
+}
+
+func (t Todos) Print() {
+	if len(t) < 1 {
+		fmt.Println("(empty)")
+	}
+
+	for i, item := range t {
+		i++
+		fmt.Printf("%d = %s\n", i, item.Task)
+	}
+
 }
