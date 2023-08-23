@@ -93,6 +93,7 @@ func (t *Todos) Store(filename string) error {
 	return nil
 }
 
+// Print prints all the todo items to the console.
 func (t Todos) Print() {
 	if len(t) < 1 {
 		fmt.Println("(empty)")
@@ -102,5 +103,4 @@ func (t Todos) Print() {
 		i++
 		fmt.Printf("%d = %s\n", i, item.Task)
 	}
-
 }
