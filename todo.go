@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
+	"runtime"
 	"time"
 
 	"github.com/alexeyco/simpletable"
@@ -97,6 +99,11 @@ func (t *Todos) Store(filename string) error {
 
 // Print prints all the todo items to the console.
 func (t Todos) Print() {
+
+	clearScreen()
+	fmt.Printf("\n\n")
+	printCurrentDateTime()
+
 	if len(t) < 1 {
 		fmt.Println("(empty)")
 	}
@@ -117,10 +124,20 @@ func (t Todos) Print() {
 
 	for index, item := range t {
 		index++
+		var task string
+		var completed string
+		if item.Done {
+			task = green(fmt.Sprintf("\u2713 %s", item.Task))
+			completed = green(fmt.Sprintf("COMPLETED"))
+		} else {
+			task = blue(fmt.Sprintf("\u2501 %s", item.Task))
+			completed = red(fmt.Sprintf("PENDING"))
+		}
+
 		cells = append(cells, []*simpletable.Cell{
 			{Text: fmt.Sprintf("%d", index)},
-			{Text: item.Task},
-			{Text: fmt.Sprintf("%t", item.Done)},
+			{Text: task},
+			{Text: fmt.Sprintf("%s", completed)},
 			{Text: item.CreatedAt.Format(time.RFC822)},
 			{Text: item.CompletedAt.Format(time.RFC822)},
 		})
@@ -128,13 +145,56 @@ func (t Todos) Print() {
 
 	table.Body = &simpletable.Body{Cells: cells}
 
-	// table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
-	// 	{Align: simpletable.AlignCenter, Span: 5, Text: fmt.Sprintf("completed: %d", len(t))},
-	// 	{Align: simpletable.AlignCenter, Span: 5, Text: fmt.Sprintf("completed: %d", len(t))},
-	// }}
-
-	table.SetStyle(simpletable.StyleMarkdown)
+	table.SetStyle(simpletable.StyleUnicode)
 
 	table.Println()
 
+	fmt.Println()
+
+	fmt.Println("\t\t\t" + red(fmt.Sprintf("pending: %d", t.CountPending())) + "\t\t\t" + green(fmt.Sprintf("completed: %d", t.CountCompleted())))
+
+	fmt.Printf("\n\n\n")
+
+}
+
+func (t *Todos) CountPending() int {
+	total := 0
+	for _, item := range *t {
+		if !item.Done {
+			total += 1
+		}
+	}
+
+	return total
+}
+
+func (t *Todos) CountCompleted() int {
+	total := 0
+	for _, item := range *t {
+		if item.Done {
+			total += 1
+		}
+	}
+
+	return total
+}
+
+func printCurrentDateTime() {
+	currentTime := time.Now()
+	fmt.Printf("%s\n\n", currentTime.Format(time.RFC1123))
+}
+
+func clearScreen() {
+	var clearCmd string
+
+	switch runtime.GOOS {
+	case "windows":
+		clearCmd = "cls"
+	default:
+		clearCmd = "clear"
+	}
+
+	cmd := exec.Command(clearCmd)
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 }
