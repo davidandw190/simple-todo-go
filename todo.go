@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/alexeyco/simpletable"
 )
 
 // Item represents a single todo item.
@@ -99,8 +101,40 @@ func (t Todos) Print() {
 		fmt.Println("(empty)")
 	}
 
-	for i, item := range t {
-		i++
-		fmt.Printf("%d = %s\n", i, item.Task)
+	table := simpletable.New()
+
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: "#"},
+			{Align: simpletable.AlignCenter, Text: "Task"},
+			{Align: simpletable.AlignCenter, Text: "Status"},
+			{Align: simpletable.AlignCenter, Text: "Created At"},
+			{Align: simpletable.AlignCenter, Text: "Completed At"},
+		},
 	}
+
+	var cells [][]*simpletable.Cell
+
+	for index, item := range t {
+		index++
+		cells = append(cells, []*simpletable.Cell{
+			{Text: fmt.Sprintf("%d", index)},
+			{Text: item.Task},
+			{Text: fmt.Sprintf("%t", item.Done)},
+			{Text: item.CreatedAt.Format(time.RFC822)},
+			{Text: item.CompletedAt.Format(time.RFC822)},
+		})
+	}
+
+	table.Body = &simpletable.Body{Cells: cells}
+
+	// table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
+	// 	{Align: simpletable.AlignCenter, Span: 5, Text: fmt.Sprintf("completed: %d", len(t))},
+	// 	{Align: simpletable.AlignCenter, Span: 5, Text: fmt.Sprintf("completed: %d", len(t))},
+	// }}
+
+	table.SetStyle(simpletable.StyleMarkdown)
+
+	table.Println()
+
 }
