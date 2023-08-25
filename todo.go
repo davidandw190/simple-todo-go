@@ -99,7 +99,6 @@ func (t *Todos) Store(filename string) error {
 
 // Print prints all the todo items to the console.
 func (t Todos) Print() {
-
 	clearScreen()
 	fmt.Printf("\n\n")
 	printCurrentDateTime()
@@ -108,6 +107,16 @@ func (t Todos) Print() {
 		fmt.Println("(empty)")
 	}
 
+	table := createTable(t)
+
+	table.Println()
+
+	fmt.Println()
+
+	fmt.Printf("\t\t\tPending: %d\t\t\tCompleted: %d\n\n\n", t.countPending(), t.countCompleted())
+}
+
+func createTable(todos Todos) *simpletable.Table {
 	table := simpletable.New()
 
 	table.Header = &simpletable.Header{
@@ -120,59 +129,56 @@ func (t Todos) Print() {
 		},
 	}
 
-	var cells [][]*simpletable.Cell
-
-	for index, item := range t {
+	for index, item := range todos {
 		index++
-		var task string
-		var completed string
-		if item.Done {
-			task = green(fmt.Sprintf("\u2713 %s", item.Task))
-			completed = green(fmt.Sprintf("COMPLETED"))
-		} else {
-			task = blue(fmt.Sprintf("\u2501 %s", item.Task))
-			completed = red(fmt.Sprintf("PENDING"))
-		}
+		task := formatTask(item)
+		completed := formatStatus(item.Done)
 
-		cells = append(cells, []*simpletable.Cell{
+		row := []*simpletable.Cell{
 			{Text: fmt.Sprintf("%d", index)},
 			{Text: task},
-			{Text: fmt.Sprintf("%s", completed)},
+			{Text: completed},
 			{Text: item.CreatedAt.Format(time.RFC822)},
 			{Text: item.CompletedAt.Format(time.RFC822)},
-		})
+		}
+
+		table.Body.Cells = append(table.Body.Cells, row)
 	}
 
-	table.Body = &simpletable.Body{Cells: cells}
-
 	table.SetStyle(simpletable.StyleUnicode)
-
-	table.Println()
-
-	fmt.Println()
-
-	fmt.Println("\t\t\t" + red(fmt.Sprintf("pending: %d", t.CountPending())) + "\t\t\t" + green(fmt.Sprintf("completed: %d", t.CountCompleted())))
-
-	fmt.Printf("\n\n\n")
-
+	return table
 }
 
-func (t *Todos) CountPending() int {
+func formatTask(item Item) string {
+	if item.Done {
+		return Green(fmt.Sprintf("\u2713 %s", item.Task))
+	}
+	return Blue(fmt.Sprintf("\u2501 %s", item.Task))
+}
+
+func formatStatus(done bool) string {
+	if done {
+		return Green("COMPLETED")
+	}
+	return Red("PENDING..")
+}
+
+func (t Todos) countPending() int {
 	total := 0
-	for _, item := range *t {
+	for _, item := range t {
 		if !item.Done {
-			total += 1
+			total++
 		}
 	}
 
 	return total
 }
 
-func (t *Todos) CountCompleted() int {
+func (t Todos) countCompleted() int {
 	total := 0
-	for _, item := range *t {
+	for _, item := range t {
 		if item.Done {
-			total += 1
+			total++
 		}
 	}
 
