@@ -13,6 +13,9 @@ import (
 	"github.com/alexeyco/simpletable"
 )
 
+const layoutOld string = " 2 Aug - 15:04"
+const layoutToday string = "Today - 15:04"
+
 // Item represents a single todo item.
 type Item struct {
 	Task        string
@@ -27,10 +30,9 @@ type Todos []Item
 // Add adds a new task to the todo list.
 func (t *Todos) Add(task string) {
 	todo := Item{
-		Task:        task,
-		Done:        false,
-		CreatedAt:   time.Now(),
-		CompletedAt: time.Time{},
+		Task:      task,
+		Done:      false,
+		CreatedAt: time.Now(),
 	}
 
 	*t = append(*t, todo)
@@ -113,7 +115,6 @@ func (t Todos) Print() {
 
 	fmt.Println()
 
-	fmt.Printf("\t\t\tPending: %d\t\t\tCompleted: %d\n\n\n", t.countPending(), t.countCompleted())
 }
 
 func createTable(todos Todos) *simpletable.Table {
@@ -132,14 +133,16 @@ func createTable(todos Todos) *simpletable.Table {
 	for index, item := range todos {
 		index++
 		task := formatTask(item)
-		completed := formatStatus(item.Done)
+		status := formatStatus(item.Done)
+		createdAt := formatTimestamp(item.CreatedAt)
+		completedAt := formatTimestamp(item.CompletedAt)
 
 		row := []*simpletable.Cell{
 			{Text: fmt.Sprintf("%d", index)},
 			{Text: task},
-			{Text: completed},
-			{Text: item.CreatedAt.Format(time.RFC822)},
-			{Text: item.CompletedAt.Format(time.RFC822)},
+			{Align: simpletable.AlignCenter, Text: status},
+			{Align: simpletable.AlignLeft, Text: createdAt},
+			{Align: simpletable.AlignCenter, Text: completedAt},
 		}
 
 		table.Body.Cells = append(table.Body.Cells, row)
@@ -160,7 +163,7 @@ func formatStatus(done bool) string {
 	if done {
 		return Green("COMPLETED")
 	}
-	return Red("PENDING..")
+	return Red("...")
 }
 
 func (t Todos) countPending() int {
@@ -183,6 +186,19 @@ func (t Todos) countCompleted() int {
 	}
 
 	return total
+}
+
+func formatTimestamp(timestamp time.Time) string {
+	currentTime := time.Now()
+	ut := time.Time{}
+
+	if timestamp == ut {
+		return Red("...")
+
+	} else if timestamp.Year() == currentTime.Year() && timestamp.YearDay() == currentTime.YearDay() {
+		return timestamp.Format(layoutToday)
+	}
+	return timestamp.Format(layoutOld)
 }
 
 func printCurrentDateTime() {
