@@ -62,6 +62,18 @@ func (t *Todos) Delete(index int) error {
 	return nil
 }
 
+// DeleteAll removes all the existing  tasks.
+func (t *Todos) DeleteAll() error {
+	if len(*t) == 0 {
+		return errors.New("todo list already empty")
+	}
+
+	*t = []Item{}
+
+	return nil
+
+}
+
 // Load reads and deserializes todo items from a file.
 func (t *Todos) Load(filename string) error {
 	file, err := os.ReadFile(filename)
