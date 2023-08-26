@@ -38,6 +38,16 @@ func (t *Todos) Add(task string) {
 	*t = append(*t, todo)
 }
 
+func (t *Todos) Edit(index int, newTask string) error {
+	if index < 1 || index > len(*t) {
+		return errors.New("invelid index")
+	}
+
+	(*t)[index-1].Task = newTask
+
+	return nil
+}
+
 // Complete marks a task as completed by index.
 func (t *Todos) Complete(index int) error {
 	if index < 1 || index > len(*t) {
