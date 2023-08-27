@@ -13,8 +13,10 @@ import (
 	"github.com/alexeyco/simpletable"
 )
 
-const layoutOld string = " 2 Aug - 15:04"
-const layoutToday string = "Today - 15:04"
+const (
+	layoutOld   string = "2 Aug - 15:04"
+	layoutToday string = "Today - 15:04"
+)
 
 // Item represents a single todo item.
 type Item struct {
@@ -129,11 +131,7 @@ func (t Todos) Print() {
 	printCurrentDateTime()
 	fmt.Printf("\t\tPending: %d\t\tCompleted: %d\n\n", t.countPending(), t.countCompleted())
 
-	if len(t) < 1 {
-		fmt.Println("(empty)")
-	}
-
-	table := createTable(t)
+	table := createTable(t, true)
 
 	table.Println()
 
@@ -141,8 +139,52 @@ func (t Todos) Print() {
 
 }
 
-func createTable(todos Todos) *simpletable.Table {
+// PrintCompleted prints only the completed todo items to the console.
+func (t Todos) PrintCompleted() {
+	clearScreen()
+	fmt.Printf("\n\n")
+	printCurrentDateTime()
+	fmt.Printf("\t\tCompleted: %d\n\n", t.countCompleted())
+
+	completed := t.filterCompleted()
+	table := createTable(completed, false)
+
+	table.Println()
+
+	fmt.Println()
+}
+
+// PrintPending prints only the pending todo items to the console.
+func (t Todos) PrintPending() {
+	clearScreen()
+	fmt.Printf("\n\n")
+	printCurrentDateTime()
+	fmt.Printf("\t\tPending: %d\n\n", t.countPending())
+
+	pending := t.filterPending()
+	table := createTable(pending, false)
+
+	table.Println()
+
+	fmt.Println()
+}
+
+// createTable generates a table based on the provided todos and showIndex flag.
+func createTable(todos Todos, showIndex bool) *simpletable.Table {
 	table := simpletable.New()
+
+	if showIndex {
+		createIndexedTable(todos, table)
+	} else {
+		createUnindexedTable(todos, table)
+	}
+
+	table.SetStyle(simpletable.StyleUnicode)
+	return table
+}
+
+// createIndexedTable creates a table with indexed rows for the given todos.
+func createIndexedTable(todos Todos, table *simpletable.Table) {
 
 	table.Header = &simpletable.Header{
 		Cells: []*simpletable.Cell{
@@ -171,11 +213,39 @@ func createTable(todos Todos) *simpletable.Table {
 
 		table.Body.Cells = append(table.Body.Cells, row)
 	}
-
-	table.SetStyle(simpletable.StyleUnicode)
-	return table
 }
 
+// createUnindexedTable creates a table without indexing for the given todos.
+func createUnindexedTable(todos Todos, table *simpletable.Table) {
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: "Task"},
+			{Align: simpletable.AlignCenter, Text: "Status"},
+			{Align: simpletable.AlignCenter, Text: "Created At"},
+			{Align: simpletable.AlignCenter, Text: "Completed At"},
+		},
+	}
+
+	for _, item := range todos {
+		task := formatTask(item)
+		status := formatStatus(item.Done)
+		createdAt := formatTimestamp(item.CreatedAt)
+		completedAt := formatTimestamp(item.CompletedAt)
+
+		row := []*simpletable.Cell{
+
+			{Text: task},
+			{Align: simpletable.AlignCenter, Text: status},
+			{Align: simpletable.AlignLeft, Text: createdAt},
+			{Align: simpletable.AlignCenter, Text: completedAt},
+		}
+
+		table.Body.Cells = append(table.Body.Cells, row)
+	}
+
+}
+
+// formatTask formats the task string based on its completion status.
 func formatTask(item Item) string {
 	if item.Done {
 		return Green(fmt.Sprintf("\u2713 %s", item.Task))
@@ -183,6 +253,7 @@ func formatTask(item Item) string {
 	return Blue(fmt.Sprintf("\u2501 %s", item.Task))
 }
 
+// formatStatus formats the status string based on whether the task is done.
 func formatStatus(done bool) string {
 	if done {
 		return Green("COMPLETED")
@@ -190,6 +261,7 @@ func formatStatus(done bool) string {
 	return Red("...")
 }
 
+// countPending returns the count of pending tasks.
 func (t Todos) countPending() int {
 	total := 0
 	for _, item := range t {
@@ -201,6 +273,7 @@ func (t Todos) countPending() int {
 	return total
 }
 
+// countCompleted returns the count of completed tasks.
 func (t Todos) countCompleted() int {
 	total := 0
 	for _, item := range t {
@@ -212,6 +285,7 @@ func (t Todos) countCompleted() int {
 	return total
 }
 
+// formatTimestamp formats the given timestamp as a readable string.
 func formatTimestamp(timestamp time.Time) string {
 	currentTime := time.Now()
 	ut := time.Time{}
@@ -225,11 +299,37 @@ func formatTimestamp(timestamp time.Time) string {
 	return timestamp.Format(layoutOld)
 }
 
+// printCurrentDateTime prints the current date and time.
 func printCurrentDateTime() {
 	currentTime := time.Now()
 	fmt.Printf("%s", currentTime.Format(time.RFC1123))
 }
 
+// filterCompleted filters and returns only the completed tasks.
+func (t Todos) filterCompleted() Todos {
+	var completed Todos
+	for _, item := range t {
+		if item.Done {
+			completed = append(completed, item)
+		}
+	}
+
+	return completed
+}
+
+// filterPending filters and returns only the pending tasks.
+func (t Todos) filterPending() Todos {
+	var pending Todos
+	for _, item := range t {
+		if !item.Done {
+			pending = append(pending, item)
+		}
+	}
+
+	return pending
+}
+
+// clearScreen clears, of course, the terminal screen.
 func clearScreen() {
 	var clearCmd string
 

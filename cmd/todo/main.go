@@ -21,6 +21,8 @@ func main() {
 	complete := flag.Int("c", 0, "Mark a todo item as completed")
 	delete := flag.Int("d", 0, "Delete a todo item")
 	deleteAll := flag.Bool("da", false, "Delete all the existing todo items")
+	showCompleted := flag.Bool("sc", false, "Show only completed todo items")
+	showPending := flag.Bool("sp", false, "Show only pending todo items")
 
 	flag.BoolVar(list, "list", false, "List all todo items")
 	flag.BoolVar(add, "add", false, "Add a new todo item")
@@ -28,6 +30,8 @@ func main() {
 	flag.IntVar(complete, "complete", 0, "Mark a todo item as completed")
 	flag.IntVar(delete, "del", 0, "Delete a todo item")
 	flag.BoolVar(deleteAll, "delall", false, "Delete all the existing todo items")
+	flag.BoolVar(showCompleted, "completed", false, "Show only completed todo items")
+	flag.BoolVar(showPending, "pending", false, "Show only pending todo items")
 
 	flag.Parse()
 
@@ -40,7 +44,13 @@ func main() {
 
 	switch {
 	case *list:
-		todos.Print()
+		if *showCompleted {
+			todos.PrintCompleted()
+		} else if *showPending {
+			todos.PrintPending()
+		} else {
+			todos.Print()
+		}
 
 	case *add:
 		task := getInput(false, flag.Args()...)
@@ -118,6 +128,10 @@ func main() {
 		todo.PrintRedStderr("\n[!] Error storing todo items: " + err.Error())
 		os.Exit(1)
 	}
+}
+
+func handleCommands(todos *todo.Todos) {
+	panic("unimplemented")
 }
 
 func getInput(editMode bool, args ...string) string {
