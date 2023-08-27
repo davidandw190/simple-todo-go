@@ -38,6 +38,7 @@ func (t *Todos) Add(task string) {
 	*t = append(*t, todo)
 }
 
+// Edit modifies the task of an existing todo item, found by index.
 func (t *Todos) Edit(index int, newTask string) error {
 	if index < 1 || index > len(*t) {
 		return errors.New("invelid index")
@@ -126,6 +127,7 @@ func (t Todos) Print() {
 	clearScreen()
 	fmt.Printf("\n\n")
 	printCurrentDateTime()
+	fmt.Printf("\t\tPending: %d\t\tCompleted: %d\n\n", t.countPending(), t.countCompleted())
 
 	if len(t) < 1 {
 		fmt.Println("(empty)")
@@ -225,7 +227,7 @@ func formatTimestamp(timestamp time.Time) string {
 
 func printCurrentDateTime() {
 	currentTime := time.Now()
-	fmt.Printf("%s\n\n", currentTime.Format(time.RFC1123))
+	fmt.Printf("%s", currentTime.Format(time.RFC1123))
 }
 
 func clearScreen() {

@@ -34,7 +34,7 @@ func main() {
 	todos := &todo.Todos{}
 
 	if err := todos.Load(todoFile); err != nil {
-		todo.PrintRedStderr("[!] Error loading todo items: " + err.Error())
+		todo.PrintRedStderr("\n[!] Error loading todo items: " + err.Error())
 		os.Exit(1)
 	}
 
@@ -46,43 +46,76 @@ func main() {
 		task := getInput(false, flag.Args()...)
 		todos.Add(task)
 
+		todos.Print()
+
+		fmt.Print(todo.Green("[*] New todo added successfully!\n"))
+
+		fmt.Println()
+
 	case *edit > 0:
 		newTask := getInput(true, flag.Args()...)
+
 		err := todos.Edit(*edit, newTask)
 		if err != nil {
-			todo.PrintRedStderr("[!] Error editing todo item: " + err.Error())
+			todo.PrintRedStderr("\n[!] Error editing todo item: " + err.Error())
 			os.Exit(1)
 		}
+
+		todos.Print()
+
+		fmt.Print(todo.Green("[*] Todo edited successfully!\n"))
+
+		fmt.Println()
 
 	case *complete > 0:
 		err := todos.Complete(*complete)
 		if err != nil {
-			todo.PrintRedStderr("[!] Error completing todo item: " + err.Error())
+			todo.PrintRedStderr("\n[!] Error completing todo item: " + err.Error())
 			os.Exit(1)
 		}
+
+		todos.Print()
+
+		fmt.Print(todo.Green("[*] Todo completed successfully!\n"))
+
+		fmt.Println()
 
 	case *delete > 0:
 		err := todos.Delete(*delete)
 		if err != nil {
-			todo.PrintRedStderr("[!] Error deleting todo item: " + err.Error())
+			todo.PrintRedStderr("\n[!] Error deleting todo item: " + err.Error())
 			os.Exit(1)
 		}
+
+		todos.Print()
+
+		fmt.Print(todo.Green("[*] Task deleted successfully!\n"))
+
+		fmt.Println()
 
 	case *deleteAll:
 		err := todos.DeleteAll()
 		if err != nil {
-			todo.PrintRedStderr("[!] Error deleting todo item: " + err.Error())
+			todo.PrintRedStderr("\n[!] Error deleting todo item: " + err.Error())
 			os.Exit(1)
 		}
 
+		todos.Print()
+
+		fmt.Print(todo.Green("[*] All todos were deleted successfully!\n"))
+
+		fmt.Println()
+
 	default:
+		fmt.Println()
 		todo.PrintBlue(os.Stdout, "[?] Invalid command\n")
 		os.Exit(0)
 	}
 
 	err := todos.Store(todoFile)
 	if err != nil {
-		todo.PrintRedStderr("[!] Error storing todo items: " + err.Error())
+		fmt.Println()
+		todo.PrintRedStderr("\n[!] Error storing todo items: " + err.Error())
 		os.Exit(1)
 	}
 }
@@ -95,15 +128,16 @@ func getInput(editMode bool, args ...string) string {
 	reader := bufio.NewReader(os.Stdin)
 
 	if editMode {
-		fmt.Print("> Enter the modified task: ")
+		fmt.Print(todo.Blue("\n> Enter the modified task: "))
 	} else {
-		fmt.Print("> Enter new task:")
+		fmt.Print(todo.Blue("\n> Enter new task: "))
 	}
 
 	input, _ := reader.ReadString('\n')
 	input = strings.TrimSpace(strings.Replace(input, "\r", "", -1))
 
 	if len(input) == 0 {
+		fmt.Println()
 		todo.PrintRedStderr("[!] Empty todo is not allowed\n")
 		os.Exit(1)
 	}
