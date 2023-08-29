@@ -1,6 +1,6 @@
 # CLI Todo App in Go
 
-This project is a simple but efficient CLI todo application written in Go, which allows you to manage your tasks through a simple and intuitive interface directly from your terminal. This is one of my first Go projects and it was inspired by the initail project of [Abah Joseph](https://github.com/joefazee), over which I taken a few different approaches and greatly expanded upon.
+This project represents a simple but efficient CLI pplication written in Go, which allows you to manage your tasks through a simple and intuitive interface directly from your terminal. This is one of my first Go projects and it was initially inspired by the work of [Abah Joseph](https://github.com/joefazee). However, I've adopted quite a few distinct approaches and significantly expanded upon the initial concept.
 
 ![Demo](./resources/todo-go-demo.gif)
 ## Setup
