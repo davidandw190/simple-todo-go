@@ -23,7 +23,7 @@ cd todo && go build ./cmd/todo
 
 3. Add the directory containing the executable to the system's PATH environment variable. I will showcase how to do it on LINUX, but it will work through other means on Windows too:
 ```
-export PATH=$PATH:/path/to/your/cli/app
+export PATH=$PATH:/full/path/to/the/program/here
 ```
 
 ## Usage 
@@ -70,8 +70,3 @@ To delete all existing tasks, run the following command:
 ```
 todo -da
 ```
-
-
-
-
-
